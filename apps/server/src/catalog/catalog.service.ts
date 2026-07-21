@@ -31,7 +31,7 @@ export class CatalogService implements OnModuleInit {
 
   findModel(lab: string, slug: string): ModelEntry | undefined {
     const id = `${catalogLabSlug(lab)}/${catalogSlug(slug)}`
-    return this.getCatalog().models.find((m) => m.id === id)
+    return this.getCatalog().models.find((m) => m.id === id || catalogIdKey(m.id) === id)
   }
 
   async refresh() {
