@@ -5,7 +5,7 @@
   "scripts": {
     "update-data": "bash scripts/update-data.sh",
     "dev": "pnpm -r --parallel run dev",
-    "build": "pnpm -r run build",
+    "build": "pnpm -r run build && tsc -b apps/server/tsconfig.json",
     "start": "bash scripts/ensure-data.sh && node apps/server/dist/main.js"
   },
   "devDependencies": {

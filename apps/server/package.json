@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/main.ts",
-    "build": "tsc -b tsconfig.json",
+    "build:tsc": "tsc -b tsconfig.json",
     "start": "node dist/main.js"
   },
   "dependencies": {
