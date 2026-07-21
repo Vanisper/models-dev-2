@@ -1,0 +1,13 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "typescript.preferences.autoImportFileExcludePatterns": ["**/dist/**"],
+  "files.exclude": {
+    "**/*.tsbuildinfo": true
+  },
+  "search.exclude": {
+    "**/pnpm-lock.yaml": true,
+    "**/data/*.json": true,
+    "**/data/*.html": true
+  }
+}
