@@ -1,9 +1,14 @@
 {
   "name": "models-dev-2",
   "private": true,
+  "packageManager": "pnpm@10.33.2",
   "scripts": {
     "update-data": "bash scripts/update-data.sh",
     "dev": "pnpm -r --parallel run dev",
-    "build": "pnpm -r run build"
+    "build": "pnpm -r run build",
+    "start": "bash scripts/ensure-data.sh && node apps/server/dist/main.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
   }
 }

@@ -28,6 +28,9 @@ export class CatalogService implements OnModuleInit {
   }
 
   async refresh() {
+    if (process.env.VERCEL || process.env.DATA_READONLY) {
+      return { ok: false, reason: "read-only environment: update data via redeploy instead" }
+    }
     await execFileAsync("bash", [path.join(ROOT_DIR, "scripts/update-data.sh")], { cwd: ROOT_DIR })
     await this.reload()
     return { ok: true, updatedAt: this.getCatalog().updatedAt }

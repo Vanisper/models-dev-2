@@ -1,0 +1,9 @@
+.git
+node_modules
+**/node_modules
+**/dist
+data
+.vscode
+.vercel
+*.log
+**/*.tsbuildinfo

@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "")
+
 export type ModelCost = {
   input: number
   output: number
@@ -65,7 +67,7 @@ export type Catalog = {
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url)
+  const response = await fetch(`${API_BASE}${url}`)
   if (!response.ok) throw new Error(`${url}: ${response.status}`)
   return response.json() as Promise<T>
 }
@@ -86,7 +88,7 @@ export function useModel(lab: string, slug: string) {
 }
 
 export async function refreshCatalog() {
-  const response = await fetch("/api/catalog/refresh", { method: "POST" })
+  const response = await fetch(`${API_BASE}/api/catalog/refresh`, { method: "POST" })
   if (!response.ok) throw new Error(`refresh failed: ${response.status}`)
   return response.json()
 }
