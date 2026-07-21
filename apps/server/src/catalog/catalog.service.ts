@@ -8,6 +8,13 @@ import { Catalog, LabEntry, ModelBenchmark, ModelCost, ModelEntry } from "./cata
 const execFileAsync = promisify(execFile)
 const DATA_DIR = process.env.DATA_DIR ?? path.resolve(__dirname, "../../../../data")
 const ROOT_DIR = path.resolve(__dirname, "../../../..")
+const DATA_SOURCE = process.env.DATA_SOURCE ?? (process.env.VERCEL ? "remote" : "local")
+
+const REMOTE_URLS = {
+  catalog: "https://models.dev/catalog.json",
+  api: "https://models.dev/api.json",
+  labs: "https://models.dev/labs",
+}
 
 @Injectable()
 export class CatalogService implements OnModuleInit {
@@ -28,23 +35,42 @@ export class CatalogService implements OnModuleInit {
   }
 
   async refresh() {
-    if (process.env.VERCEL || process.env.DATA_READONLY) {
+    if (DATA_SOURCE === "remote") {
+      await this.reload()
+      return { ok: true, mode: "remote", updatedAt: this.getCatalog().updatedAt }
+    }
+    if (process.env.DATA_READONLY) {
       return { ok: false, reason: "read-only environment: update data via redeploy instead" }
     }
     await execFileAsync("bash", [path.join(ROOT_DIR, "scripts/update-data.sh")], { cwd: ROOT_DIR })
     await this.reload()
-    return { ok: true, updatedAt: this.getCatalog().updatedAt }
+    return { ok: true, mode: "local", updatedAt: this.getCatalog().updatedAt }
   }
 
   async reload() {
-    const [catalogRaw, apiRaw, labsRaw] = await Promise.all([
-      readFile(path.join(DATA_DIR, "catalog.json"), "utf8").then(JSON.parse),
-      readFile(path.join(DATA_DIR, "api.json"), "utf8").then(JSON.parse),
-      readFile(path.join(DATA_DIR, "labs.html"), "utf8"),
-    ])
+    const startedAt = Date.now()
+    const [catalogRaw, apiRaw, labsRaw] = DATA_SOURCE === "remote" ? await fetchRemote() : await readLocal()
     this.catalog = buildCatalog(catalogRaw, apiRaw, labsRaw)
-    console.log(`catalog loaded: ${this.catalog.models.length} models, ${this.catalog.labs.length} labs`)
+    console.log(
+      `catalog loaded (${DATA_SOURCE}): ${this.catalog.models.length} models, ${this.catalog.labs.length} labs in ${Date.now() - startedAt}ms`,
+    )
   }
+}
+
+async function readLocal(): Promise<[unknown, unknown, string]> {
+  return Promise.all([
+    readFile(path.join(DATA_DIR, "catalog.json"), "utf8").then(JSON.parse),
+    readFile(path.join(DATA_DIR, "api.json"), "utf8").then(JSON.parse),
+    readFile(path.join(DATA_DIR, "labs.html"), "utf8"),
+  ])
+}
+
+async function fetchRemote(): Promise<[unknown, unknown, string]> {
+  return Promise.all([
+    fetch(REMOTE_URLS.catalog).then((r) => (r.ok ? r.json() : undefined)),
+    fetch(REMOTE_URLS.api).then((r) => (r.ok ? r.json() : undefined)),
+    fetch(REMOTE_URLS.labs).then((r) => (r.ok ? r.text() : "")),
+  ])
 }
 
 function buildCatalog(payload: unknown, apiPayload: unknown, labsHtml: string): Catalog {
