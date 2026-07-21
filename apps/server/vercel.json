@@ -4,5 +4,11 @@
     "api/**/*.ts": {
       "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/catalog/refresh",
+      "schedule": "0 4 * * *"
+    }
+  ]
 }

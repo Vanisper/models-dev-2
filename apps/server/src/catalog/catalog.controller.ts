@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, NotFoundException, Param, Post } from "@nestjs/common"
+import { Controller, Get, Headers, Inject, NotFoundException, Param, Post, UnauthorizedException } from "@nestjs/common"
 import { CatalogService } from "./catalog.service"
 
 @Controller("catalog")
@@ -24,6 +24,13 @@ export class CatalogController {
 
   @Post("refresh")
   refresh() {
+    return this.catalog.refresh()
+  }
+
+  @Get("refresh")
+  cronRefresh(@Headers("authorization") authorization?: string) {
+    const secret = process.env.CRON_SECRET
+    if (secret && authorization !== `Bearer ${secret}`) throw new UnauthorizedException()
     return this.catalog.refresh()
   }
 }
