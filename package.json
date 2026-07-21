@@ -1,0 +1,9 @@
+{
+  "name": "models-dev-2",
+  "private": true,
+  "scripts": {
+    "update-data": "bash scripts/update-data.sh",
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build"
+  }
+}
