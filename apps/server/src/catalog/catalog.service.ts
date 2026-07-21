@@ -65,12 +65,15 @@ async function readLocal(): Promise<[unknown, unknown, string]> {
   ])
 }
 
+type RemoteResponse = { ok: boolean; json(): Promise<unknown>; text(): Promise<string> }
+
 async function fetchRemote(): Promise<[unknown, unknown, string]> {
-  return Promise.all([
-    fetch(REMOTE_URLS.catalog).then((r) => (r.ok ? r.json() : undefined)),
-    fetch(REMOTE_URLS.api).then((r) => (r.ok ? r.json() : undefined)),
-    fetch(REMOTE_URLS.labs).then((r) => (r.ok ? r.text() : "")),
+  const [catalog, api, labs] = await Promise.all([
+    fetch(REMOTE_URLS.catalog) as Promise<RemoteResponse>,
+    fetch(REMOTE_URLS.api) as Promise<RemoteResponse>,
+    fetch(REMOTE_URLS.labs) as Promise<RemoteResponse>,
   ])
+  return [catalog.ok ? await catalog.json() : undefined, api.ok ? await api.json() : undefined, labs.ok ? await labs.text() : ""]
 }
 
 function buildCatalog(payload: unknown, apiPayload: unknown, labsHtml: string): Catalog {
